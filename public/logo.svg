@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Open Box with Items - Lost & Found Logo -->
+  <defs>
+    <!-- Shadow filter -->
+    <filter id="boxDropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#1E293B" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- BACKGROUND: White / Transparent -->
+  <rect width="500" height="500" fill="transparent" />
+
+  <!-- 1. UMBRELLA (Sticking out on the right) -->
+  <g id="umbrella" transform="translate(25, 0)">
+    <!-- Umbrella Canopy (Red jagged/scalloped umbrella top) -->
+    <path 
+      d="M 245 185 Q 295 110 375 185 C 360 178 340 188 330 182 C 315 178 300 188 285 182 C 270 178 255 188 245 185 Z" 
+      fill="#E63946" 
+    />
+    <!-- Umbrella Ferrule / Tip -->
+    <polygon points="310,135 315,120 320,135" fill="#C52233" />
+    
+    <!-- Umbrella Shaft (White / Silver rod) -->
+    <rect x="312" y="105" width="16" height="55" rx="3" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="1.5" />
+    
+    <!-- Umbrella Curved Handle (Vibrant Red) -->
+    <path 
+      d="M 320 125 L 320 85 C 320 50 380 50 380 85 C 380 110 355 115 355 102 C 355 95 365 92 365 85 C 365 65 335 65 335 85 L 335 125 Z" 
+      fill="#E63946" 
+    />
+  </g>
+
+  <!-- 2. GREEN BOOK (Center, tilted right) -->
+  <g id="green-book" transform="rotate(16 230 200)">
+    <!-- Book Cover -->
+    <rect x="180" y="145" width="85" height="110" rx="6" fill="#439A38" stroke="#36802C" stroke-width="2" />
+    <!-- Book Spine & Pages Edge -->
+    <rect x="188" y="145" width="70" height="10" rx="2" fill="#EBF5E9" />
+    <!-- Book Cover Inner Accent Line -->
+    <line x1="195" y1="170" x2="195" y2="245" stroke="#36802C" stroke-width="3" stroke-linecap="round" />
+    <rect x="205" y="170" width="50" height="65" rx="3" fill="#4FA944" />
+  </g>
+
+  <!-- 3. SMARTPHONE (Left, tilted left) -->
+  <g id="smartphone" transform="rotate(-18 150 200)">
+    <!-- Phone Body (Dark Slate / Charcoal) -->
+    <rect x="100" y="125" width="76" height="130" rx="14" fill="#242833" stroke="#171A21" stroke-width="3" />
+    <!-- Phone Screen (Glossy Dark Cyan-Grey) -->
+    <rect x="106" y="137" width="64" height="106" rx="8" fill="#383E4D" />
+    <!-- Screen Glass Highlight / Reflection -->
+    <polygon points="108,140 148,140 120,240 108,240" fill="#FFFFFF" opacity="0.12" />
+    <!-- Phone Speaker Notch / Front Camera -->
+    <circle cx="138" cy="132" r="2.5" fill="#64748B" />
+  </g>
+
+  <!-- 4. CARDBOARD BOX (Front, Lost & Found labeled) -->
+  <g id="cardboard-box">
+    <!-- Box Left Flap (Folded Outwards Left) -->
+    <polygon points="90,240 160,240 135,290 65,290" fill="#D29352" stroke="#B87B3C" stroke-width="2" />
+
+    <!-- Box Top Rim Shadow (inside opening) -->
+    <polygon points="140,240 370,240 350,290 120,290" fill="#9C632C" />
+
+    <!-- Box Right Flap (Folded Outwards Up) -->
+    <polygon points="160,240 380,240 430,290 210,290" fill="#EDB67B" stroke="#D29352" stroke-width="2" />
+
+    <!-- Left Side Panel (Darker shadow face) -->
+    <polygon points="90,290 160,290 160,430 90,430" fill="#B87B3C" />
+
+    <!-- Front Face (Warm Kraft Cardboard Brown) -->
+    <rect x="160" y="290" width="240" height="140" fill="#EDB67B" stroke="#D29352" stroke-width="3" />
+
+    <!-- Box Left Front Border Line -->
+    <line x1="160" y1="290" x2="160" y2="430" stroke="#B87B3C" stroke-width="3" />
+
+    <!-- "Lost & Found" TEXT ON BOX -->
+    <text 
+      x="280" 
+      y="350" 
+      text-anchor="middle" 
+      font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+      font-size="36" 
+      font-weight="800" 
+      fill="#B87333" 
+      letter-spacing="0.5"
+    >
+      Lost &amp;
+    </text>
+    <text 
+      x="280" 
+      y="395" 
+      text-anchor="middle" 
+      font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+      font-size="36" 
+      font-weight="800" 
+      fill="#B87333" 
+      letter-spacing="0.5"
+    >
+      Found
+    </text>
+  </g>
+</svg>

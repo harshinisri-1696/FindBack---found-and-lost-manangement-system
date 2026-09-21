@@ -1,0 +1,6 @@
+{
+  "name": "FindBack – Smart Campus Lost & Found Management System",
+  "description": "Smart campus Lost and Found management platform for college students, faculty, and administrators to report, match, verify, and recover belongings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
