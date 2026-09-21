@@ -18,6 +18,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { Item } from '../../types';
+import { uploadItemImage } from '../../services/storageService';
 
 export const ReportLostPage: React.FC = () => {
   const { addItem, currentUser, categories, setCurrentView, showToast, setSelectedItemId } = useApp();
@@ -32,7 +33,9 @@ export const ReportLostPage: React.FC = () => {
   const [identifyingFeatures, setIdentifyingFeatures] = useState('');
   const [imageUrl, setImageUrl] = useState(PRESET_IMAGE_OPTIONS[0].url);
   const [customImageUploaded, setCustomImageUploaded] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [additionalInfo, setAdditionalInfo] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submittedItem, setSubmittedItem] = useState<Item | null>(null);
@@ -44,19 +47,24 @@ export const ReportLostPage: React.FC = () => {
         showToast('Please select a valid image file (JPG, PNG, WebP)', 'error');
         return;
       }
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Image file exceeds the 5MB size limit', 'error');
+        return;
+      }
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (uploadEvent) => {
         if (uploadEvent.target?.result) {
           setImageUrl(uploadEvent.target.result as string);
           setCustomImageUploaded(true);
-          showToast('Image uploaded and preview generated.', 'info');
+          showToast('Image selected and ready for upload.', 'info');
         }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
@@ -86,6 +94,16 @@ export const ReportLostPage: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(true);
+    let finalImageUrl = imageUrl;
+
+    if (selectedFile) {
+      const uploadRes = await uploadItemImage(selectedFile);
+      if (uploadRes.success && uploadRes.publicUrl) {
+        finalImageUrl = uploadRes.publicUrl;
+      }
+    }
+
     const created = addItem({
       user_id: currentUser ? currentUser.user_id : 'usr_student_1',
       reporter_name: currentUser ? currentUser.name : 'Student Reporter',
@@ -99,10 +117,11 @@ export const ReportLostPage: React.FC = () => {
       color: color.trim() || 'Unspecified',
       brand: brand.trim() || 'Unspecified',
       identifying_features: identifyingFeatures.trim(),
-      image: imageUrl,
+      image: finalImageUrl,
       additional_info: additionalInfo.trim(),
     });
 
+    setIsSubmitting(false);
     setSubmittedItem(created);
     showToast('Lost item reported successfully!', 'success');
   };

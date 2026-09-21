@@ -12,6 +12,8 @@ import {
   KeyRound
 } from 'lucide-react';
 import { LostFoundLogo } from '../common/LostFoundLogo';
+import { loginWithSupabase } from '../../services/authService';
+import { isSupabaseConfigured } from '../../services/supabase';
 
 export const LoginPage: React.FC = () => {
   const { loginUser, users, setCurrentView, showToast } = useApp();
@@ -30,7 +32,7 @@ export const LoginPage: React.FC = () => {
     if (!password) setPassword('Campus@2026');
   }, []);
 
-  const executeLogin = (userIdentifier: string, userPass: string) => {
+  const executeLogin = async (userIdentifier: string, userPass: string) => {
     // If identifier or password was somehow blank, fallback to auto-fill defaults
     const idToUse = userIdentifier.trim() || 'USER104';
     const passToUse = userPass || 'Campus@2026';
@@ -42,6 +44,18 @@ export const LoginPage: React.FC = () => {
     }
 
     setIsSubmitting(true);
+
+    // Try Supabase Auth first if configured
+    if (isSupabaseConfigured()) {
+      const supaResult = await loginWithSupabase(idToUse, passToUse);
+      if (supaResult.success && supaResult.user) {
+        setIsSubmitting(false);
+        loginUser(supaResult.user);
+        return;
+      }
+    }
+
+    // Local / Sample user authentication fallback
     const trimmedId = idToUse.trim().toLowerCase();
     const foundUser = users.find(u => 
       u.email.toLowerCase() === trimmedId || 
@@ -60,9 +74,8 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(false);
     loginUser(foundUser);
-    showToast(`Welcome back, ${foundUser.name}!`, 'success');
-    setCurrentView('dashboard');
   };
 
   const handleSubmit = (e: React.FormEvent) => {

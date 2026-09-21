@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { UserRole } from '../../types';
 import { LostFoundLogo } from '../common/LostFoundLogo';
+import { registerWithSupabase } from '../../services/authService';
+import { isSupabaseConfigured } from '../../services/supabase';
 
 export const RegisterPage: React.FC = () => {
   const { users, loginUser, setCurrentView, showToast } = useApp();
@@ -33,10 +35,11 @@ export const RegisterPage: React.FC = () => {
   const [department, setDepartment] = useState('Information Technology');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const passwordStrength = checkPasswordStrength(password);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validateRegistration({
       name,
@@ -60,6 +63,34 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
+    if (isSupabaseConfigured()) {
+      const supaResult = await registerWithSupabase({
+        name: name.trim(),
+        college_id: collegeId.trim().toUpperCase(),
+        email: email.trim().toLowerCase(),
+        phone: phone.trim(),
+        password,
+        role,
+        department
+      });
+
+      if (!supaResult.success) {
+        setIsSubmitting(false);
+        setErrors({ email: supaResult.error || 'Failed to create campus account in Supabase.' });
+        showToast(supaResult.error || 'Registration failed', 'error');
+        return;
+      }
+
+      if (supaResult.user) {
+        setIsSubmitting(false);
+        loginUser(supaResult.user);
+        showToast('Campus account created successfully!', 'success');
+        return;
+      }
+    }
+
     const newUser = {
       user_id: `usr_${Date.now()}`,
       name: name.trim(),
@@ -72,6 +103,7 @@ export const RegisterPage: React.FC = () => {
       department,
     };
 
+    setIsSubmitting(false);
     loginUser(newUser);
     showToast('Campus account created successfully!', 'success');
   };

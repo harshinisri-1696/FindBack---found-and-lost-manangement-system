@@ -18,6 +18,24 @@ import {
   INITIAL_CATEGORIES 
 } from '../data/sampleData';
 import { findMatchesForItem, getAllSmartMatches } from '../utils/matchingAlgorithm';
+import { 
+  fetchItemsFromSupabase, 
+  insertItemToSupabase, 
+  updateItemStatusInSupabase, 
+  deleteItemFromSupabase 
+} from '../services/itemService';
+import { 
+  fetchRecoveryRequestsFromSupabase, 
+  insertRecoveryRequestToSupabase, 
+  updateRecoveryStatusInSupabase 
+} from '../services/recoveryService';
+import { 
+  fetchNotificationsFromSupabase, 
+  insertNotificationToSupabase, 
+  markNotificationAsReadInSupabase 
+} from '../services/notificationService';
+import { logoutFromSupabase } from '../services/authService';
+import { isSupabaseConfigured } from '../services/supabase';
 
 interface Toast {
   id: string;
@@ -217,6 +235,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentUser]);
 
+  // Initial load from Supabase if configured
+  useEffect(() => {
+    if (isSupabaseConfigured()) {
+      fetchItemsFromSupabase().then(dbItems => {
+        if (dbItems && dbItems.length > 0) {
+          setItems(dbItems);
+        }
+      });
+      fetchRecoveryRequestsFromSupabase().then(dbReqs => {
+        if (dbReqs && dbReqs.length > 0) {
+          setRecoveryRequests(dbReqs);
+        }
+      });
+      fetchNotificationsFromSupabase().then(dbNotifs => {
+        if (dbNotifs && dbNotifs.length > 0) {
+          setNotifications(dbNotifs);
+        }
+      });
+    }
+  }, []);
+
   const showToast = (message: string, type: 'success' | 'info' | 'warning' | 'error' = 'success') => {
     const id = Date.now().toString() + Math.random().toString(36).substring(2, 5);
     setToasts(prev => [...prev, { id, type, message }]);
@@ -240,6 +279,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logoutUser = () => {
+    logoutFromSupabase().catch(() => {});
     setCurrentUser(null);
     showToast('Logged out successfully.', 'info');
     setCurrentView('home');
@@ -281,6 +321,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setItems(prev => [newItem, ...prev]);
 
+    // Sync to Supabase PostgreSQL database
+    insertItemToSupabase(newItem).catch(err => console.warn('Supabase insert item warning:', err));
+
     // Check for smart matches automatically!
     const matches = findMatchesForItem(newItem, items, 55);
     if (matches.length > 0 && currentUser) {
@@ -299,6 +342,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         created_at: now,
       };
       setNotifications(prev => [newNotif, ...prev]);
+      insertNotificationToSupabase(newNotif).catch(() => {});
     }
 
     return newItem;
@@ -311,11 +355,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return item;
     }));
+    updateItemStatusInSupabase(itemId, newStatus).catch(err => console.warn('Supabase update status warning:', err));
     showToast(`Report status updated to: ${newStatus}`, 'info');
   };
 
   const deleteItem = (itemId: string) => {
     setItems(prev => prev.filter(i => i.item_id !== itemId));
+    deleteItemFromSupabase(itemId).catch(err => console.warn('Supabase delete item warning:', err));
     showToast('Report deleted successfully.', 'info');
   };
 
@@ -337,6 +383,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setRecoveryRequests(prev => [newReq, ...prev]);
+    insertRecoveryRequestToSupabase(newReq).catch(err => console.warn('Supabase recovery sync warning:', err));
     updateItemStatus(itemId, 'Recovery Requested');
 
     // Notify user
@@ -352,6 +399,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         created_at: now,
       };
       setNotifications(prev => [notif, ...prev]);
+      insertNotificationToSupabase(notif).catch(() => {});
     }
 
     return newReq;
@@ -370,11 +418,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return req;
     }));
+    updateRecoveryStatusInSupabase(requestId, newStatus, adminRemarks).catch(err => console.warn('Supabase recovery update warning:', err));
     showToast(`Recovery request #${requestId.slice(-4)} marked as: ${newStatus}`, 'success');
   };
 
   const markNotificationAsRead = (notifId: string) => {
     setNotifications(prev => prev.map(n => n.notification_id === notifId ? { ...n, is_read: true } : n));
+    markNotificationAsReadInSupabase(notifId).catch(() => {});
   };
 
   const markAllNotificationsAsRead = () => {
