@@ -1,7 +1,7 @@
 // Netlify Function: recovery-action.js
 // Handles recovery approvals, status updates, and notification generation
 
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -15,7 +15,7 @@ const headers = {
   'Content-Type': 'application/json'
 };
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
@@ -109,3 +109,5 @@ exports.handler = async (event, context) => {
     };
   }
 };
+
+export default handler;
